@@ -1,3 +1,11 @@
+/*
+This application implements a shake detection based on android phone's accelerometer signal.
+Based on the accelerometer signal magnitude, a surrogate for jerk value (accelerometer derivative)
+ is computed (Though we named the variable as speed in the code).
+ Signals are filtered with a moving average filter of window length 3. A pattern in changes in jerk
+ values are used for detecting shake.
+ */
+
 package com.example.shakedetector;
 
 import androidx.appcompat.app.AppCompatActivity;

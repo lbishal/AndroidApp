@@ -1,3 +1,18 @@
+/*
+This application implements a real-time gesture detection based on android phone's accelerometer signal.
+Following mathematical figures are detected:
+    Circle, Square, Triangle.
+
+
+Based on the accelerometer signal magnitude:
+    speed estimate (surrogate) is computed.
+    This is filtered with moving average filter.
+    Then a template matching is done, with checks that the detected template, have a certain
+      threshold of signal magnitude (to avoid spurious detections from noise).
+    Template is updated as signature of given shape are identified on the go.
+
+ */
+
 package com.example.gesturedetector;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -302,14 +317,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         shapeDetected = "No Shape";
                     }
                     else {
+
+                        //to update template signal
+                        Object[] speedTemplateObj = speedTemplateDeque.toArray();
+                        Double[] speedTemplate     = new Double[speedTemplateDeque.size()];
+                        for(int i=0;i<speedTemplateDeque.size();i++){
+                            speedTemplate[i] = (Double) (speedTemplateObj[i]);
+                        }
+
                         if(currCorrelationCircle > currCorrelationSquare && currCorrelationCircle > currCorrelationTriangle) {
                             shapeDetected = "Circle";
+                            for (int i=0;i<templatePoints;i++) {
+                                circleTemplate[i] = circleTemplate[i] + 0.2*speedTemplate[i];
+                            }
                         }
                         else if(currCorrelationSquare > currCorrelationCircle && currCorrelationSquare > currCorrelationTriangle) {
                             shapeDetected = "Square";
+                            for (int i=0;i<templatePoints;i++) {
+                                squareTemplate[i] = squareTemplate[i] + 0.2*speedTemplate[i];
+                            }
                         }
                         else {
                             shapeDetected = "Triangle";
+                            for (int i=0;i<templatePoints;i++) {
+                                triangleTemplate[i] = triangleTemplate[i] + 0.2*speedTemplate[i];
+                            }
                         }
                         TextView lastShape = (TextView) findViewById(R.id.gestureDecisionLast);
                         lastShape.setText(shapeDetected);

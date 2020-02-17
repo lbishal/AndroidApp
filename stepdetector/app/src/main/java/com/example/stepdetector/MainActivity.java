@@ -1,3 +1,12 @@
+/*
+This application implements a real-time step detection based on android phone's accelerometer signal.
+Based on the accelerometer signal magnitude, speed estimate (surrogate) is computed. This is filtered
+with moving average filter. Then a template matching is done, with checks that the detected step
+template, have a certain threshold of signal magnitude (to avoid spurious detections from noise).
+Template is updated as signature of given person's steps are identified.
+
+ */
+
 package com.example.stepdetector;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,10 +24,8 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
@@ -32,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int latestDecision =0;//variable to keep track of step detection
     private int countStep = 0;
     private double templateCorrelationThreshold = 0.7;
+
     private Double[] templateSignal = { -0.124511,-0.14722985, -0.14286704, -0.06707362,
             -0.05615815,-0.03482528, -0.00217015,  0.04454678,  0.0686863 ,  0.13771749,
             0.16672203,  0.18137357,  0.05211326, -0.06255626, -0.12578879,-0.077148};
