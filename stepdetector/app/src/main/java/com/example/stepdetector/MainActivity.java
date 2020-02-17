@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         currentDecision = 0;
                     }
                     else {
-                        currDecision = 1;
+                        currentDecision = 1;
                         countStep = countStep + 1;
 
                         //update template signal
