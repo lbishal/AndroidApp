@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -36,14 +37,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private int countSensorData;
     private int latestDecision =0;//variable to keep track of shake detection
     private int countShake = 0;
+    private double templateCorrelationThreshold = 0.7;
+
+    private Double[] templateSignal = {
+            -3.30952551, -97.28523667, -28.46568939,   0.68370311,
+            51.94749017,  38.01577785,  34.54754804, -40.78960607,
+            -90.51392819, -66.43417981};
 
     //store information about incoming sensor data
     int numElements       = 3;
-    int decisionPoints    = 4;
+    int templatePoints    = templateSignal.length;
     ArrayDeque accDeque   = new ArrayDeque<Double>(numElements);
     ArrayDeque timeDeque  = new ArrayDeque<Long>(numElements);
     ArrayDeque speedDeque = new ArrayDeque<Double>(numElements);
-    ArrayDeque speedDecisionDeque = new ArrayDeque<Integer>(decisionPoints);
+    ArrayDeque speedTemplateDeque = new ArrayDeque<Double>(templatePoints);
     double currSpeed;
 
 
@@ -77,9 +84,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             speedDeque.add(0.0);
         }
 
-        //initialize array to save speed decisions
-        for(int i=0; i<decisionPoints; i++) {
-            speedDecisionDeque.add(0);
+        //initialize array to save speed/jerk trajectory
+        for(int i=0; i<templatePoints; i++) {
+            speedTemplateDeque.add(0.0);
         }
 
         //initialize sensor data count
@@ -134,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         countSensorData = 0;
     }
 
+    /* We will switch to template matching for shake detection
     //function to detect shake
     public int detectShake( ) {
         Object[] speedDecisionObj = speedDecisionDeque.toArray();
@@ -155,7 +163,66 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         else {
             return 0;
         }
+    }*/
+
+    //adapted from https://www.geeksforgeeks.org/program-find-correlation-coefficient/
+    double correlationCoefficient(Double X[], Double Y[])
+    {
+        double sum_X = 0, sum_Y = 0, sum_XY = 0;
+        double squareSum_X = 0, squareSum_Y = 0;
+        int n = X.length;
+
+        for (int i = 0; i < n; i++)
+        {
+            // sum of elements of array X.
+            sum_X = sum_X + X[i];
+
+            // sum of elements of array Y.
+            sum_Y = sum_Y + Y[i];
+
+            // sum of X[i] * Y[i].
+            sum_XY = sum_XY + X[i] * Y[i];
+
+            // sum of square of array elements.
+            squareSum_X = squareSum_X + X[i] * X[i];
+            squareSum_Y = squareSum_Y + Y[i] * Y[i];
+        }
+
+        // use formula for calculating correlation coefficient.
+        double corr = (double)(n * sum_XY - sum_X * sum_Y)
+                / Math.sqrt((n * squareSum_X - sum_X * sum_X)
+                * (n * squareSum_Y - sum_Y * sum_Y));
+
+        return corr;
     }
+
+    //function to compute correlation
+    public double computeCorrelation( ) {
+        Object[] speedTemplateObj = speedTemplateDeque.toArray();
+        Double[] speedTemplate     = new Double[speedTemplateDeque.size()];
+        for(int i=0;i<speedTemplateDeque.size();i++){
+            speedTemplate[i] = (Double) (speedTemplateObj[i]);
+        }
+        Log.d("Debug",Arrays.toString(speedTemplate));
+
+        //compute correlation between speedTemplate and templateSignal
+        double currCorrelation = correlationCoefficient(speedTemplate,
+                templateSignal);
+        return currCorrelation;
+    }
+
+    public double rangeSpeed() {
+        Object[] speedTemplateObj = speedTemplateDeque.toArray();
+        Double[] speedTemplate     = new Double[speedTemplateDeque.size()];
+        for(int i=0;i<speedTemplateDeque.size();i++){
+            speedTemplate[i] = (Double) (speedTemplateObj[i]);
+        }
+        double minSpeed = Collections.min(Arrays.asList(speedTemplate));
+        double maxSpeed = Collections.max(Arrays.asList(speedTemplate));
+        double speedRange = maxSpeed - minSpeed;
+        return speedRange;
+    }
+
 
     //Function called when sensor values change
     @Override
@@ -205,8 +272,50 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 }
                 double speedSmooth = speedSum/numElements;
                 Log.d("Algo","Speed smooth is "+String.valueOf(speedSmooth)+" Threshold is "+String.valueOf(detectorThreshold));
-                int currDecision = 0;
 
+                //add speedSmooth to the deque
+                speedTemplateDeque.add(speedSmooth);
+                speedTemplateDeque.removeFirst();
+
+                double currCorrelation = computeCorrelation();
+                Log.d("Debug","Correlation is "+String.valueOf(currCorrelation));
+                int currentDecision;
+
+                if(currCorrelation > templateCorrelationThreshold){
+                    double currentSpeedRange = rangeSpeed();
+                    if(currentSpeedRange < detectorThreshold) {
+                        currentDecision = 0;
+                    }
+                    else {
+                        currentDecision = 1;
+                        countShake = countShake + 1;
+
+                        //update template signal
+                        Object[] speedTemplateObj = speedTemplateDeque.toArray();
+                        Double[] speedTemplate     = new Double[speedTemplateDeque.size()];
+                        for(int i=0;i<speedTemplateDeque.size();i++){
+                            speedTemplate[i] = (Double) (speedTemplateObj[i]);
+                        }
+                        for (int i=0;i<templatePoints;i++) {
+                            templateSignal[i] = templateSignal[i] + 0.2*speedTemplate[i];
+                        }
+
+                        for(int i=0;i<templatePoints;i++){
+                            speedTemplateDeque.add(0.0);
+                            speedTemplateDeque.removeFirst();
+                        }
+                    }
+                }
+                else {
+                    currentDecision = 0;
+                }
+
+
+
+
+
+
+                /* This is for jerk signature based detection
                 if(speedSmooth > detectorThreshold) {
                     if(latestDecision == 1) {
                         currDecision = 0;
@@ -234,8 +343,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 int shakeDetectionResult = detectShake();
 
                 countShake = countShake + shakeDetectionResult;
+
+                */
+
                 String shakeDetectionString;
-                if(shakeDetectionResult == 1){
+                if(currentDecision == 1){
                     shakeDetectionString = "Shake";
                 }
                 else {
