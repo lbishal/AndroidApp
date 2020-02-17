@@ -63,13 +63,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             0.04195654,  0.02418591, -0.01900421,  0.00120961, -0.02903992,
             -0.08193207, -0.12744195, -0.13876107, -0.08331881, -0.04673043};
 
-    private Double[] triangleTemplate = {-0.00232294, -0.02315076, -0.06442559, -0.07599193, -0.05420867,
-            0.00731588,  0.08747468,  0.15535034,  0.15857211,  0.16149756,
-            0.07257184,  0.01226744, -0.08731143, -0.08929534, -0.05139911,
-            -0.03996301, -0.01209325,  0.01105713,  0.04961868,  0.05183847,
-            0.0386554 ,  0.00075373, -0.00269006, -0.01872825, -0.0164282 ,
-            -0.05702731, -0.09523498, -0.0995472 , -0.083036  , -0.02352503,
-            -0.00923437,  0.01052863,  0.0231087 ,  0.02714429,  0.03643199};
+    private Double[] triangleTemplate = {-0.04006087, -0.0724415 , -0.00600627,  0.04002379,  0.07363573,
+            0.0448149 ,  0.11911902,  0.12953733,  0.11576079, -0.00614756,
+            -0.0247129 , -0.10136406, -0.09530652, -0.10644339, -0.04243002,
+            -0.00642079,  0.03926032,  0.04981631,  0.07426349,  0.03971873,
+            0.03252332, -0.02726553, -0.02045063, -0.00534629,  0.02029409,
+            0.02553932,  0.03244879,  0.01680453,  0.00226621, -0.05226111,
+            -0.12199557, -0.12398746, -0.08488322, -0.01382969, -0.00752589};
 
     //store information about incoming sensor data
     int numElements       = 3;
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         //obtain a reference to file
         File savePath = getExternalFilesDir(null);
         Log.d("Sys Out",savePath.toString());
-        File saveFile = new File(savePath,"data_step.csv");
+        File saveFile = new File(savePath,"data_gesture.csv");
 
         try {
             fOut = new FileOutputStream(saveFile);
