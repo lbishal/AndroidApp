@@ -255,11 +255,21 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                     else {
                         currDecision = 1;
                         countStep = countStep + 1;
+
+                        //update template signal
+                        Object[] speedTemplateObj = speedTemplateDeque.toArray();
+                        Double[] speedTemplate     = new Double[speedTemplateDeque.size()];
+                        for(int i=0;i<speedTemplateDeque.size();i++){
+                            speedTemplate[i] = (Double) (speedTemplateObj[i]);
+                        }
+                        for (int i=0;i<templatePoints;i++) {
+                            templateSignal[i] = templateSignal[i] + 0.2*speedTemplate[i];
+                        }
+
                         for(int i=0;i<templatePoints;i++){
                             speedTemplateDeque.add(0.0);
                             speedTemplateDeque.removeFirst();
                         }
-
                     }
                 }
                 else {
