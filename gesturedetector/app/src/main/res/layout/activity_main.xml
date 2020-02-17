@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity"
+    android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="The 3D acceleration values are:" />
+
+        <!-- Display acceleromter values here -->
+
+        <TextView
+            android:id="@+id/accOutput"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" "
+             />
+
+
+        <!-- Decision from gesture detector -->
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Current Detected Shape is: "
+             />
+
+        <TextView
+            android:id="@+id/gestureDecision"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" No Shape "
+             />
+
+        <TextView
+            android:id="@+id/AddView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Last Detected Shape is: "
+            />
+
+        <TextView
+            android:id="@+id/gestureDecisionLast"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" No Shape "
+            />
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Enter threshold value here "
+            app:layout_constraintBottom_toBottomOf="parent"
+            />
+
+        <EditText
+            android:id="@+id/thresholdInput"
+            android:layout_width="96dp"
+            android:layout_height="63dp"
+            android:ems="10"
+            android:inputType="numberDecimal"
+            android:text="0.12"/>
+
+        <Button
+            android:id="@+id/start_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start"
+            android:onClick="startGestureDetection"/>
+
+        <Button
+            android:id="@+id/stop_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="stopGestureDetection"
+            android:text="Stop"/>
+
+
+
+
+    </LinearLayout>
+
